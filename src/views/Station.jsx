@@ -1,7 +1,14 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+//import { useStations } from "../hooks/useStations";
+
+import { findStation } from "../api/digitraffic";
+//import { useLiveTrains } from "../hooks/useLiveTrains";
+//import { useWagons } from "../hooks/useWagons";
+import { useStations, useLiveTrains, useWagons } from "../hooks/apiHooks";
 
 
+/*
 const mockTrains = [
     {
         time: "16:18",
@@ -60,18 +67,42 @@ const mockTrains = [
         vaununumerot: [79, 78],
     },
 ];
+*/
 
 
 const Station = () =>{
 
+    const { stationName } = useParams();
+    const navigate = useNavigate();
 
     const [option, setOption] = useState('departures');
     const [isOpen, setIsOpen] = useState(false);
 
     const [station, setStation] = useState('');
-    const navigate = useNavigate();
+    
 
-    const stationDisplay = 'Helsinki';
+    //const stationDisplay = 'Helsinki';
+
+    const { stations, namesByCode, error: stationsError } = useStations();
+
+    const stationInfo = useMemo(() => (stations.length ? findStation(stations, stationName) : null),
+                                        [stations, stationName]);
+    
+    const notFound = stations.length > 0 && !stationInfo;
+
+    const { trains, loading, error } = useLiveTrains(
+        stationInfo?.stationShortCode,
+        option,
+        namesByCode
+    );
+
+    const getWagons = useWagons(trains);
+
+    const stationDisplay = stationInfo
+        ? stationInfo.stationName.replace(/ asema$/i, "")
+        : stationName;
+
+    const errorMessage = stationsError || error || (notFound && `Station "${stationName}" not found`);
 
 
     
@@ -79,7 +110,6 @@ const Station = () =>{
         if(!station.trim()){
             return;
         }
-
         navigate(`/station/${station.trim().toLowerCase()}`);
     }
 
@@ -191,49 +221,55 @@ const Station = () =>{
 
 
 
+                    {loading && <p className="mt-6 text-gray-500">Loading…</p>}
+                    {errorMessage && <p className="mt-6 text-red-600">{errorMessage}</p>}
+                    {!loading && !errorMessage && trains.length === 0 && (
+                        <p className="mt-6 text-gray-500">No trains found.</p>
+                    )}
                     {/*Train list */}
                     <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
 
-                        {mockTrains.map((train, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center border-b border-gray-100 px-5 py-4 last:border-b-0 hover:bg-gray-50"
-                            >
+                        {trains.map((train) =>{
+                            const wagons = getWagons(train.id);
 
-                                {/* Time */}
-                                <div className="w-20 text-lg font-semibold">
-                                    {train.time}
-                                </div>
+                            return(
+                                <div
+                                    key={train.id}
+                                    className="flex items-center border-b border-gray-100 px-5 py-4 last:border-b-0 hover:bg-gray-50"
+                                >
 
-
-                                {/* Train */}
-                                <div className="p-2">
-                                    <div className="font-medium border rounded-full px-3 py-1 inline-block">
-                                        {train.train}
-                                    </div>
-                                </div>
-
-
-                                {/* Destination */}
-                                <div className="flex-1">
-                                    <div className="text-gray-700">
-                                        {option == "departures"
-                                            ? train.destination
-                                            : "Helsinki"}
-                                    </div>
-                                </div>
-
-                                {/* Runkolinja + Vaununumerot */}
-                                <div className="flex shrink-0 flex-col items-end gap-1">
-                                    {/* Runkolinja */}
-                                    <div className="text-xs font-medium text-gray-500">
-                                        {train.runkolinja || "—"}
+                                    {/* Time */}
+                                    <div className="w-20">
+                                        <div className={`text-lg font-semibold ${train.cancelled ? "text-gray-400 line-through" : ""}`}>
+                                            {train.time}
+                                        </div>
+                                        {train.delayMinutes > 0 && (
+                                            <div className="text-xs text-red-600">
+                                                +{train.delayMinutes} min
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Vaununumerot */}
-                                    <div className="flex flex-wrap gap-1">
-                                        {train.vaununumerot?.length ? (
-                                            train.vaununumerot.map((number, i) => (
+                                    
+
+
+                                    {/* Train */}
+                                    <div className="p-2">
+                                        <div className="font-medium border rounded-full px-3 py-1 inline-block">
+                                            {train.train}
+                                        </div>
+                                    </div>
+
+
+                                    {/* Destination (origin for arrivals) */}
+                                    <div className="flex-1">
+                                        <div className="text-gray-700">{train.destination}</div>
+                                    </div>
+
+                                    {/* Wagons */}
+                                    <div className="flex shrink-0 flex-wrap justify-end gap-1">
+                                        {wagons.length ? (
+                                            wagons.map((number, i) => (
                                                 <div
                                                     key={`${number}-${i}`}
                                                     className="rounded-t-md rounded-b-sm border border-gray-400 px-2 py-1 text-xs font-semibold"
@@ -247,19 +283,20 @@ const Station = () =>{
                                             </div>
                                         )}
                                     </div>
-                                </div>
 
 
-                                {/* Platform */}
-                                <div className="ml-auto w-12 shrink-0 text-right">
-                                    <div className="text-xs text-gray-500"></div>
-                                    <div className="text-xl font-bold">
-                                        {train.platform || "—"}
+                                    {/* Platform */}
+                                    <div className="ml-auto w-12 shrink-0 text-right">
+                                        <div className="text-xs text-gray-500"></div>
+                                        <div className="text-xl font-bold">
+                                            {train.platform || "—"}
+                                        </div>
                                     </div>
+
                                 </div>
 
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
             </div>
         </main>
