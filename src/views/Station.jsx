@@ -8,30 +8,56 @@ const mockTrains = [
         train: "IC 25",
         destination: "Tampere",
         platform: "3",
+        runkolinja: "8891",
+        vaununumerot: [21, 22, 23],
     },
     {
         time: "16:27",
         train: "P 32",
         destination: "Riihimäki",
         platform: "5",
+        runkolinja: "8892",
+        vaununumerot: [1, 2, 3],
     },
     {
         time: "16:40",
         train: "R 964",
         destination: "Lahti",
         platform: "4",
+        runkolinja: "8893",
+        vaununumerot: [],
     },
     {
         time: "16:52",
         train: "IC 47",
         destination: "Oulu",
         platform: "7",
+        runkolinja: "8894",
+        vaununumerot: [],
     },
     {
         time: "17:03",
         train: "Z 984",
         destination: "Lahti",
         platform: "5",
+        runkolinja: "8895",
+        vaununumerot: [21, 2, 3],
+    },
+    {
+        time: "17:23",
+        train: "K",
+        destination: "Kerava",
+        platform: "7",
+        runkolinja: "8896",
+        vaununumerot: [45, 46],
+    },
+    {
+        time: "17:28",
+        train: "P",
+        destination: "Lentoasema",
+        platform: "6",
+        runkolinja: "8897",
+        vaununumerot: [79, 78],
     },
 ];
 
@@ -181,8 +207,8 @@ const Station = () =>{
 
 
                                 {/* Train */}
-                                <div className="w-24">
-                                    <div className="font-medium">
+                                <div className="p-2">
+                                    <div className="font-medium border rounded-full px-3 py-1 inline-block">
                                         {train.train}
                                     </div>
                                 </div>
@@ -197,10 +223,39 @@ const Station = () =>{
                                     </div>
                                 </div>
 
+                                {/* Runkolinja + Vaununumerot */}
+                                <div className="flex shrink-0 flex-col items-end gap-1">
+                                    {/* Runkolinja */}
+                                    <div className="text-xs font-medium text-gray-500">
+                                        {train.runkolinja || "—"}
+                                    </div>
+
+                                    {/* Vaununumerot */}
+                                    <div className="flex flex-wrap gap-1">
+                                        {train.vaununumerot?.length ? (
+                                            train.vaununumerot.map((number, i) => (
+                                                <div
+                                                    key={`${number}-${i}`}
+                                                    className="rounded-t-md rounded-b-sm border border-gray-400 px-2 py-1 text-xs font-semibold"
+                                                >
+                                                    {number}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="rounded-t-md rounded-b-sm border border-gray-300 px-2 py-1 text-xs text-gray-400">
+                                                —
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
 
                                 {/* Platform */}
-                                <div className="text-sm text-gray-500">
-                                    Platform {train.platform}
+                                <div className="ml-auto w-12 shrink-0 text-right">
+                                    <div className="text-xs text-gray-500"></div>
+                                    <div className="text-xl font-bold">
+                                        {train.platform || "—"}
+                                    </div>
                                 </div>
 
                             </div>
