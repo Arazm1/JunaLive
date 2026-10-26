@@ -1,73 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-//import { useStations } from "../hooks/useStations";
-
 import { findStation } from "../api/digitraffic";
-//import { useLiveTrains } from "../hooks/useLiveTrains";
-//import { useWagons } from "../hooks/useWagons";
 import { useStations, useLiveTrains, useWagons } from "../hooks/apiHooks";
-
-
-/*
-const mockTrains = [
-    {
-        time: "16:18",
-        train: "IC 25",
-        destination: "Tampere",
-        platform: "3",
-        runkolinja: "8891",
-        vaununumerot: [21, 22, 23],
-    },
-    {
-        time: "16:27",
-        train: "P 32",
-        destination: "Riihimäki",
-        platform: "5",
-        runkolinja: "8892",
-        vaununumerot: [1, 2, 3],
-    },
-    {
-        time: "16:40",
-        train: "R 964",
-        destination: "Lahti",
-        platform: "4",
-        runkolinja: "8893",
-        vaununumerot: [],
-    },
-    {
-        time: "16:52",
-        train: "IC 47",
-        destination: "Oulu",
-        platform: "7",
-        runkolinja: "8894",
-        vaununumerot: [],
-    },
-    {
-        time: "17:03",
-        train: "Z 984",
-        destination: "Lahti",
-        platform: "5",
-        runkolinja: "8895",
-        vaununumerot: [21, 2, 3],
-    },
-    {
-        time: "17:23",
-        train: "K",
-        destination: "Kerava",
-        platform: "7",
-        runkolinja: "8896",
-        vaununumerot: [45, 46],
-    },
-    {
-        time: "17:28",
-        train: "P",
-        destination: "Lentoasema",
-        platform: "6",
-        runkolinja: "8897",
-        vaununumerot: [79, 78],
-    },
-];
-*/
+import { trainBadgeStyle } from "../utils/trainColors";
 
 
 const Station = () =>{
@@ -255,7 +190,7 @@ const Station = () =>{
 
                                     {/* Train */}
                                     <div className="p-2">
-                                        <div className="font-medium border rounded-full px-3 py-1 inline-block">
+                                        <div className={`font-medium border rounded-full px-3 py-1 inline-block ${trainBadgeStyle(train)}`}>
                                             {train.train}
                                         </div>
                                     </div>
@@ -266,22 +201,28 @@ const Station = () =>{
                                         <div className="text-gray-700">{train.destination}</div>
                                     </div>
 
-                                    {/* Wagons */}
-                                    <div className="flex shrink-0 flex-wrap justify-end gap-1">
-                                        {wagons.length ? (
-                                            wagons.map((number, i) => (
-                                                <div
-                                                    key={`${number}-${i}`}
-                                                    className="rounded-t-md rounded-b-sm border border-gray-400 px-2 py-1 text-xs font-semibold"
-                                                >
-                                                    {number}
+                                    {/* Runkolinja + Wagons */}
+                                    <div className="flex shrink-0 flex-col items-end gap-1">
+                                        <div className="text-xs font-medium text-gray-500">
+                                            {train.trainNumber}
+                                        </div>
+
+                                        <div className="flex flex-wrap justify-end gap-1">
+                                            {wagons.length ? (
+                                                wagons.map((number, i) => (
+                                                    <div
+                                                        key={`${number}-${i}`}
+                                                        className="rounded-t-md rounded-b-sm border border-gray-400 px-2 py-1 text-xs font-semibold"
+                                                    >
+                                                        {number}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="rounded-t-md rounded-b-sm border border-gray-300 px-2 py-1 text-xs text-gray-400">
+                                                    —
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <div className="rounded-t-md rounded-b-sm border border-gray-300 px-2 py-1 text-xs text-gray-400">
-                                                —
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
 
 
