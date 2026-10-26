@@ -170,11 +170,11 @@ const Station = () =>{
                             return(
                                 <div
                                     key={train.id}
-                                    className="flex items-center border-b border-gray-100 px-5 py-4 last:border-b-0 hover:bg-gray-50"
+                                    className="flex flex-wrap items-center border-b border-gray-100 px-5 py-4 last:border-b-0 hover:bg-gray-50"
                                 >
 
                                     {/* Time */}
-                                    <div className="w-20">
+                                    <div className="w-14 shrink-0 sm:w-20">
                                         <div className={`text-lg font-semibold ${train.cancelled ? "text-gray-400 line-through" : ""}`}>
                                             {train.time}
                                         </div>
@@ -197,7 +197,7 @@ const Station = () =>{
 
 
                                     {/* Destination (origin for arrivals) */}
-                                    <div className="flex-1">
+                                    <div className="min-w-0 flex-1">
                                         <div className="text-gray-700">{train.destination}</div>
                                     </div>
 
