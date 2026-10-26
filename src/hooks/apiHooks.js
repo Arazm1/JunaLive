@@ -1,146 +1,115 @@
-import fetchData from "../utils/fetchData";
+//import fetchData from "../utils/fetchData";
 //import { useUserContext } from "./contextHooks";
+import { useEffect, useState, useMemo } from "react";
+import { getLiveTrains, getStations } from "../api/digitraffic";
+import { mapTrain } from "../api/mapTrains";
+import { getComposition } from "../api/digitraffic";
+import { wagonNumbers } from "../api/mapTrains";
 
 
-//Server API URL
-let SERVER_URL = import.meta.env.VITE_SERVER_URL;
-let API_URL = import.meta.env.VITE_API_URL;
-if (import.meta.env.VITE_USE_LOCAL_SERVER === 'true') {
-  SERVER_URL = import.meta.env.VITE_SERVER_URL_LOCAL;
-  API_URL = import.meta.env.VITE_API_URL_LOCAL;
+const POLL_MS = 30000;
+const cache = new Map(); // train id -> number[]
+
+const useLiveTrains = (stationCode, type, namesByCode) =>{
+    const [trains, setTrains] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!stationCode) return;
+        let cancelled = false;
+
+        setLoading(true);
+        setTrains([]);
+
+        async function load() {
+            try {
+                const raw = await getLiveTrains(stationCode, type);
+                if (cancelled) return;
+                const mapped = raw
+                    .map((t) => mapTrain(t, stationCode, type, namesByCode))
+                    .filter(Boolean)
+                    .sort((a, b) => new Date(a.scheduledTime) - new Date(b.scheduledTime));
+                setTrains(mapped);
+                setError(null);
+            } catch (e) {
+                if (!cancelled) setError(e.message);
+            } finally {
+                if (!cancelled) setLoading(false); // only matters on first load
+            }
+        }
+
+        load();
+        const id = setInterval(load, POLL_MS);
+        return () => {
+            cancelled = true;
+            clearInterval(id);
+        };
+    }, [stationCode, type, namesByCode]);
+
+    return { trains, loading, error };
 }
 
-/**
- * Custom hook for authentication-related API requests.
- * @returns {Object} Functions for interacting with the authentication related requests.
- *  - postLogin - Post login with inputs and returns token.
- *  - postRegister - Post register with inputs.
- */
-const useAuthentication = () => {
-  //Login
-  const postLogin = async (inputs) => {
-    const fetchOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(inputs),
-    };
 
-    const loginResult = await fetchData(
-      SERVER_URL + '/api/v1/auth/login',
-      fetchOptions,
+
+const useStations = () =>{
+    const [stations, setStations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        getStations()
+            .then((data) => !cancelled && setStations(data))
+            .catch((e) => !cancelled && setError(e.message))
+            .finally(() => !cancelled && setLoading(false));
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    // stable object so downstream effects don't re-run
+    const namesByCode = useMemo(
+        () => Object.fromEntries(stations.map((s) => [s.stationShortCode, s.stationName])),
+        [stations]
     );
-    return loginResult;
-  };
 
-  //Register
-  const postRegister = async (inputs) => {
-    try {
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(inputs),
-      };
-
-      const registerResult = await fetchData(SERVER_URL + '/api/v1/auth/register', fetchOptions);
-      return registerResult;
-    } catch (error) {
-      console.log('Error in postRegister: ', error);
-    }
-  };
-
-  return {postLogin, postRegister};
-
-}
-
-const useUser = () => {
-  const getUserByToken = async (token) => {
-    const fetchOptions = {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-      },
-    };
-
-    const result = await fetchData(SERVER_URL + '/api/v1/users/me', fetchOptions);
-    return { user: result };
-  };
-  return { getUserByToken }
+    return { stations, namesByCode, loading, error };
 }
 
 
-const useShift = () => {
-  const getShifts = async (token) => {
-    try{
-        const fetchOptions = {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-          }
+
+const useWagons = (trains, limit = 18) =>{
+    const [, setTick] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const missing = trains.slice(0, limit).filter((t) => !cache.has(t.id));
+        if (missing.length === 0) return;
+
+        Promise.allSettled(
+            missing.map(async (t) => {
+                const comp = await getComposition(t.departureDate, t.trainNumber);
+                cache.set(t.id, wagonNumbers(comp));
+            })
+        ).then(() => {
+            if (!cancelled) setTick((n) => n + 1); // re-render to pick up cache
+        });
+
+        return () => {
+            cancelled = true;
         };
+    }, [trains, limit]);
 
-        const result = await fetchData(SERVER_URL + '/api/v1/shifts', fetchOptions)
-        return result
-      
-    } catch(error){
-      console.log('Error in getShifts: ', error.message)
-    }
-  };
-  
-
-
-  const postShift = async (data, token) => {
-    try {
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        body: JSON.stringify(data),
-      };
-
-      const result = await fetchData(SERVER_URL + '/api/v1/shifts', fetchOptions);
-      return result;
-    } catch (error) {
-      console.log('Error in postShift: ', error);
-    }
-  };
-
-  return { getShifts, postShift }
-}
-
-
-const useCompany = () => {
-
-  const getCompanies = async (token) => {
-    try{
-        const fetchOptions = {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-          },
-        };
-
-        const result = await fetchData(SERVER_URL + '/api/v1/companies', fetchOptions)
-        return result
-      
-    } catch(error){
-      console.log('Error in getCompanies: ', error.message)
-    }
-  };
-
-  return { getCompanies }
-
+    // failed fetches aren't cached, so they get retried on the next poll
+    return (id) => cache.get(id) ?? [];
 }
 
 
 export {
-  useAuthentication,
-  useUser,
-  useShift,
-  useCompany
+  useLiveTrains,
+  useStations,
+  useWagons
+
 };
