@@ -45,8 +45,8 @@ src/components/Archive
 
 
 ## Leftovers
-client\src\assets
-client\src\components
-client\src\contexts
-client\src\hooks
-client\src\utils
+src\assets
+src\components
+src\contexts
+src\hooks
+src\utils
