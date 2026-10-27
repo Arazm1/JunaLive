@@ -3,13 +3,6 @@ import fetchData from "../utils/fetchData";
 const BASE = import.meta.env.VITE_API_URL;
 const HEADERS = { "Digitraffic-User": "JunaLive/0.1" };
 
-/*
-async function get2(path) {
-    const res = await fetch(`${BASE}${path}`, { headers: HEADERS });
-    if (!res.ok) throw new Error(`Digitraffic ${res.status}`);
-    return res.json();
-}
-    */
 
 // Wrapper function to inject Digitraffic specific URL and headers
 const get = async(path) =>{
