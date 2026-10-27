@@ -3,7 +3,7 @@
 Live train departures and arrivals for Finnish stations. Shows platform, delays, cancellations, train number (runkolinja) and wagon numbers at a glance.
 
 
-![Station view](docs\img\station_helsinki.png)
+![Station view](docs/img/station_helsinki.png)
 
 ## Features
 
