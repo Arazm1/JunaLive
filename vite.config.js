@@ -10,5 +10,5 @@ export default defineConfig({
     tailwindcss(),
 
   ],
-  base: '/',
+  base: '/~arazm/Personal_projects_mlpknxdsjbk/junalive/',
 })
