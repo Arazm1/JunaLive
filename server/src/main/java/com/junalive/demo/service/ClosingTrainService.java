@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.junalive.demo.dto.ClosingTrainDTO;
+import com.junalive.demo.dto.ClosingTrainRequest;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.repository.ClosingTrainRepository;
 
@@ -29,6 +31,7 @@ public class ClosingTrainService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<ClosingTrainDTO> getClosingTrains(LocalDate date) {
 
         return repository
@@ -42,6 +45,7 @@ public class ClosingTrainService {
     /**
      * Get closing trains for a specific date and station
      */
+    @Transactional(readOnly = true)
     public List<ClosingTrainDTO> getClosingTrains(
         LocalDate date,
         String stationCode
@@ -57,6 +61,7 @@ public class ClosingTrainService {
     /**
      * Get one closing train
      */
+    @Transactional(readOnly = true)
     public ClosingTrainDTO getClosingTrain(Integer id) {
 
         ClosingTrain train = repository.findById(id)
@@ -73,6 +78,7 @@ public class ClosingTrainService {
     /**
      * Create a closing train
      */
+    @Transactional
     public ClosingTrainDTO createClosingTrain(
             ClosingTrain closingTrain
     ) {
@@ -82,10 +88,27 @@ public class ClosingTrainService {
         return toClosingTrainDTO(savedTrain);
     }
 
+    /*
+    Currently doesnt work.
+    @Transactional
+    public int replaceList(List<ClosingTrainRequest> rows) {
+        // clear only the (date, station) pairs that are in this paste
+        rows.stream()
+            .map(r -> List.of(r.date(), r.stationCode()))
+            .distinct()
+            .forEach(p -> repository.deleteByDateAndStationCode((LocalDate) p.get(0), (String) p.get(1)));
+
+        List<ClosingTrain> entities = rows.stream().map(this::toEntity).toList();
+        repository.saveAll(entities);
+        return entities.size();
+    }
+     */
+
     /**
      * Delete a closing train
      * @param id of the train
      */
+    @Transactional
     public void deleteClosingTrain(Integer id) {
         repository.deleteById(id);
     }

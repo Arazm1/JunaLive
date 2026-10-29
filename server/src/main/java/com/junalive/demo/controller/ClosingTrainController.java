@@ -2,19 +2,24 @@ package com.junalive.demo.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.junalive.demo.dto.ClosingTrainDTO;
+import com.junalive.demo.dto.ClosingTrainListRequest;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.service.ClosingTrainService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/closing-trains")
@@ -73,7 +78,13 @@ public class ClosingTrainController {
         return service.createClosingTrain(closingTrain);
     }
 
-    @DeleteMapping("{id}")
+
+    @PutMapping
+    public Map<String, Integer> replaceList(@Valid @RequestBody ClosingTrainListRequest request){
+        return Map.of("saved", service.replaceList(request.rows()));
+    }
+
+    @DeleteMapping("/{id}")
     public void deleteClosingTrain(@PathVariable Integer id){
         service.deleteClosingTrain(id);
     }
