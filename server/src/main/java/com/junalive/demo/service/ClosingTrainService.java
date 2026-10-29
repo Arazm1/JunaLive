@@ -1,6 +1,6 @@
 package com.junalive.demo.service;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ClosingTrainService {
     }
 
 
-    public List<ClosingTrainDTO> getClosingTrains(Date date) {
+    public List<ClosingTrainDTO> getClosingTrains(LocalDate date) {
 
         return repository
                 .findByDate(date)
@@ -43,7 +43,7 @@ public class ClosingTrainService {
      * Get closing trains for a specific date and station
      */
     public List<ClosingTrainDTO> getClosingTrains(
-        Date date,
+        LocalDate date,
         String stationCode
     ){
         return repository

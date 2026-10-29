@@ -1,6 +1,6 @@
 package com.junalive.demo.controller;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +33,7 @@ public class ClosingTrainController {
      * @return
      */
     @GetMapping
-    public List<ClosingTrainDTO> getClosingTrains(@RequestParam Date date){
+    public List<ClosingTrainDTO> getClosingTrains(@RequestParam LocalDate date){
         return service.getClosingTrains(date);
     }
 
@@ -45,7 +45,7 @@ public class ClosingTrainController {
      */
     @GetMapping("/station")
     public List<ClosingTrainDTO> getClosingTrainsByStation(
-        @RequestParam Date date,
+        @RequestParam LocalDate date,
         @RequestParam  String stationCode
     ){
         return service.getClosingTrains(date, stationCode);
