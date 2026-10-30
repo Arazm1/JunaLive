@@ -5,11 +5,14 @@ spring:
         show_sql: true
         format_sql: true
         ddl-auto: validate
+  mvc:
+    format:
+      date: iso
 
   application:
     name: demo
 
   datasource:
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/DB_NAME}
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/junalive}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
