@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.junalive.demo.dto.ClosingTrainDTO;
-import com.junalive.demo.dto.ClosingTrainRequest;
+import com.junalive.demo.dto.closingtrains.ClosingTrainDTO;
+import com.junalive.demo.dto.closingtrains.ClosingTrainRequest;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.repository.ClosingTrainRepository;
 

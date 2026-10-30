@@ -1,4 +1,4 @@
-package com.junalive.demo.dto;
+package com.junalive.demo.dto.closingtrains;
 
 import java.util.List;
 

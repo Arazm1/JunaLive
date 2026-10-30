@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.junalive.demo.dto.ClosingTrainDTO;
-import com.junalive.demo.dto.ClosingTrainListRequest;
+import com.junalive.demo.dto.closingtrains.ClosingTrainDTO;
+import com.junalive.demo.dto.closingtrains.ClosingTrainListRequest;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.service.ClosingTrainService;
 
