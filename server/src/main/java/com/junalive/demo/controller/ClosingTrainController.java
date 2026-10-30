@@ -79,10 +79,12 @@ public class ClosingTrainController {
     }
 
 
+    /*
     @PutMapping
     public Map<String, Integer> replaceList(@Valid @RequestBody ClosingTrainListRequest request){
         return Map.of("saved", service.replaceList(request.rows()));
     }
+    */
 
     @DeleteMapping("/{id}")
     public void deleteClosingTrain(@PathVariable Integer id){

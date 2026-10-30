@@ -1,10 +1,11 @@
 package com.junalive.demo.dto;
 
-import java.sql.Date;
+import java.time.LocalDate;
+
 
 public record ClosingTrainStatusDTO(
     Integer id,
-    Date date,
+    LocalDate date,
     String trainLine,
     Integer trainCode,
     String stationCode,

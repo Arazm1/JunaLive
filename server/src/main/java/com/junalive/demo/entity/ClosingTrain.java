@@ -1,6 +1,7 @@
 package com.junalive.demo.entity;
 
-import java.sql.Date;
+
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +19,7 @@ public class ClosingTrain {
     private Integer id;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
 
     @Column(name = "train_line")
     private String trainLine;
@@ -31,7 +32,7 @@ public class ClosingTrain {
 
     public ClosingTrain(){}
 
-    public ClosingTrain(Date date, String trainLine, Integer trainCode, String stationCode){
+    public ClosingTrain(LocalDate date, String trainLine, Integer trainCode, String stationCode){
         this.date = date;
         this.trainLine = trainLine;
         this.trainCode = trainCode;
@@ -43,7 +44,7 @@ public class ClosingTrain {
         return this.id;
     }
 
-    public Date getDate(){
+    public LocalDate getDate(){
         return this.date;
     }
 
@@ -64,7 +65,7 @@ public class ClosingTrain {
         this.id = id;
     }
 
-    public void setDate(Date date){
+    public void setDate(LocalDate date){
         this.date = date;
     }
     

@@ -30,6 +30,16 @@ public class ClosingTrainService {
         );
     }
 
+    private ClosingTrain toEntity(ClosingTrainRequest request){
+        ClosingTrain ct = new ClosingTrain();
+        ct.setDate(request.date());
+        ct.setTrainLine(request.trainLine());
+        ct.setTrainCode(request.trainCode());
+        ct.setStationCode(request.stationCode());
+        return ct;
+
+    }
+
 
     @Transactional(readOnly = true)
     public List<ClosingTrainDTO> getClosingTrains(LocalDate date) {
@@ -103,6 +113,12 @@ public class ClosingTrainService {
         return entities.size();
     }
      */
+    /*
+    @Transactional
+    public int replaceClosingTrainList(List<ClosingTrainRequest> rows){
+        record Slot
+    }
+        */
 
     /**
      * Delete a closing train
