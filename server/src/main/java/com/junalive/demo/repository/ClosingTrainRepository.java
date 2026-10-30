@@ -15,5 +15,7 @@ public interface ClosingTrainRepository extends JpaRepository<ClosingTrain, Inte
         LocalDate date,
         String stationCode
     );
+
+    List<ClosingTrain> findByDateBetween(LocalDate fromDate, LocalDate toDate);
     
 }

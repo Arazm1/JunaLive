@@ -1,6 +1,7 @@
 package com.junalive.demo.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.junalive.demo.repository.ClosingTrainRepository;
 public class ClosingTrainService {
 
     private final ClosingTrainRepository repository;
+    private static final ZoneId HELSINKI = ZoneId.of("Europe/Helsinki");
 
     public ClosingTrainService(ClosingTrainRepository repository){
         this.repository = repository;
@@ -82,6 +84,20 @@ public class ClosingTrainService {
                 );
 
         return toClosingTrainDTO(train);
+    }
+
+
+    /**
+     * Get Closing trains between today and tomorrow
+     */
+    @Transactional(readOnly = true)
+    public List<ClosingTrainDTO> getClosingTrainsTodayAndTomorrow(){
+        LocalDate today = LocalDate.now(HELSINKI);
+        return repository
+                        .findByDateBetween(today, today.plusDays(1))
+                        .stream()
+                        .map(this::toClosingTrainDTO)
+                        .toList();
     }
 
 
