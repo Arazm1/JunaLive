@@ -13,7 +13,9 @@ public record ClosingTrainStatusDTO(
     String stationCode,
 
     // Live Digitraffic data
+    boolean found,
     String actualArrivalTime,
+    int delayMinutes,
     String platform,
     Boolean cancelled
 ) {}

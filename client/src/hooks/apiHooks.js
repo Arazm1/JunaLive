@@ -153,7 +153,7 @@ function useClosingRange(from, to) {
         async function load() {
             try {
                 const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/closing-trains/range?from=${from}&to=${to}`
+                    `${import.meta.env.VITE_BACKEND_URL}/api/closing-trains/range/status?from=${from}&to=${to}`
                 );
                 if (!res.ok) throw new Error(`Server error ${res.status}`);
                 const data = await res.json();

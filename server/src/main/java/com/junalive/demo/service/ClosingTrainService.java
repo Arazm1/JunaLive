@@ -1,6 +1,7 @@
 package com.junalive.demo.service;
 
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,19 +15,25 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.junalive.demo.client.DigitrafficClient;
 import com.junalive.demo.dto.closingtrains.ClosingTrainDTO;
 import com.junalive.demo.dto.closingtrains.ClosingTrainRequest;
+import com.junalive.demo.dto.closingtrains.ClosingTrainStatusDTO;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.repository.ClosingTrainRepository;
+
+import tools.jackson.databind.JsonNode;
 
 @Service
 public class ClosingTrainService {
 
     private final ClosingTrainRepository repository;
     private static final ZoneId HELSINKI = ZoneId.of("Europe/Helsinki");
+    private final DigitrafficClient digitraffic;
 
-    public ClosingTrainService(ClosingTrainRepository repository){
+    public ClosingTrainService(ClosingTrainRepository repository, DigitrafficClient digitraffic){
         this.repository = repository;
+        this.digitraffic = digitraffic;
     }
 
     private ClosingTrainDTO toClosingTrainDTO(ClosingTrain closingTrain){
@@ -51,6 +58,14 @@ public class ClosingTrainService {
 
     private LocalDateTime at(ClosingTrain t) {
         return LocalDateTime.of(t.getDate(), t.getArrivalTime());
+    }
+
+    private List<ClosingTrain> findInRange(LocalDateTime from, LocalDateTime to){
+        return repository.findByDateBetween(from.toLocalDate(), to.toLocalDate())
+                            .stream()
+                            .filter(t -> !at(t).isBefore(from) && at(t).isBefore(to))
+                            .sorted(Comparator.comparing(this::at))
+                            .toList();
     }
 
 
@@ -157,5 +172,69 @@ public class ClosingTrainService {
     public void deleteClosingTrain(Integer id) {
         repository.deleteById(id);
     }
+
+
+
+
+
+    // no @Transactional here: the repository call finishes before any HTTP request starts
+public List<ClosingTrainStatusDTO> getStatusRange(LocalDateTime from, LocalDateTime to) {
+    return findInRange(from, to).parallelStream()   // ~40 trains, so don't wait for them one by one
+            .map(this::toStatus)
+            .toList();                              // keeps the sorted order
+}
+
+private ClosingTrainStatusDTO toStatus(ClosingTrain ct) {
+    JsonNode train = null;
+    JsonNode row = null;
+
+    // The Excel date is the ARRIVAL date. Digitraffic wants the DEPARTURE date,
+    // which is the previous day for trains that cross midnight, so try both.
+    for (LocalDate departureDate : List.of(ct.getDate(), ct.getDate().minusDays(1))) {
+        JsonNode candidate = digitraffic.getTrain(departureDate, ct.getTrainCode());
+        if (candidate == null) continue;
+        JsonNode r = stopRow(candidate, ct.getStationCode());
+        if (r != null && arrivalDate(r).equals(ct.getDate())) {
+            train = candidate;
+            row = r;
+            break;
+        }
+    }
+
+    if (row == null) {
+        return new ClosingTrainStatusDTO(ct.getId(), ct.getDate(), ct.getArrivalTime(),
+                ct.getTrainLine(), ct.getTrainCode(), ct.getStationCode(),
+                false, null, 0, null, false);
+    }
+
+    // best available time: actual (already arrived) > estimate > schedule
+    String best = row.hasNonNull("actualTime") ? row.get("actualTime").asText()
+            : row.hasNonNull("liveEstimateTime") ? row.get("liveEstimateTime").asText()
+            : row.path("scheduledTime").asText();
+
+    return new ClosingTrainStatusDTO(ct.getId(), ct.getDate(), ct.getArrivalTime(),
+            ct.getTrainLine(), ct.getTrainCode(), ct.getStationCode(),
+            true,
+            Instant.parse(best).toString(),
+            row.path("differenceInMinutes").asInt(0),
+            row.path("commercialTrack").asText(""),
+            train.path("cancelled").asBoolean() || row.path("cancelled").asBoolean());
+}
+
+private LocalDate arrivalDate(JsonNode row) {
+    return Instant.parse(row.path("scheduledTime").asText()).atZone(HELSINKI).toLocalDate();
+}
+
+// the arrival row at this station, or the departure row if the train starts there
+private JsonNode stopRow(JsonNode train, String station) {
+    JsonNode departure = null;
+    for (JsonNode r : train.path("timeTableRows")) {
+        if (!station.equals(r.path("stationShortCode").asText())) continue;
+        if (!r.path("commercialStop").asBoolean()) continue;
+        if ("ARRIVAL".equals(r.path("type").asText())) return r;
+        departure = r;
+    }
+    return departure;
+}
     
 }

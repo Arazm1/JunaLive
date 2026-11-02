@@ -3,9 +3,7 @@ package com.junalive.demo.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.junalive.demo.dto.closingtrains.ClosingTrainDTO;
 import com.junalive.demo.dto.closingtrains.ClosingTrainListRequest;
+import com.junalive.demo.dto.closingtrains.ClosingTrainStatusDTO;
 import com.junalive.demo.entity.ClosingTrain;
 import com.junalive.demo.service.ClosingTrainService;
 
@@ -51,6 +50,13 @@ public class ClosingTrainController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
         return service.getClosingTrains(from, to);
+    }
+
+    @GetMapping("/range/status")
+    public List<ClosingTrainStatusDTO> getRangeStatus(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+        return service.getStatusRange(from, to);
     }
 
     @GetMapping("/next")

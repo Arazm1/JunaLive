@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStations, useClosingRange } from "../../hooks/apiHooks";
 import { addDays, currentNightStart, nightWindow, prettyDay } from "../../utils/dates";
-import { trainBadgeStyle } from "../../utils/trainColors";
+//import { trainBadgeStyle } from "../../utils/trainColors";
 
 function useNow(ms = 30000) {
     const [now, setNow] = useState(() => new Date());
@@ -16,8 +16,9 @@ function useNow(ms = 30000) {
 const Closing = () => {
     const tonight = currentNightStart();
     const [night, setNight] = useState(tonight);
-    const [startTime, setStartTime] = useState("22:00");
-    const [endTime, setEndTime] = useState("05:00");
+    const [startTime, setStartTime] = useState("20:00");
+    const [endTime, setEndTime] = useState("10:00");
+    
     const [selected, setSelected] = useState(null);
     const now = useNow();
 
@@ -32,8 +33,16 @@ const Closing = () => {
     const stationCode = stationCodes.includes(selected) ? selected : stationCodes[0];
     const visible = useMemo(() => trains.filter((t) => t.stationCode === stationCode), [trains, stationCode]);
 
-    const arrival = (t) => new Date(`${t.date}T${t.arrivalTime}`);
-    const nextId = visible.find((t) => arrival(t) >= now)?.id;
+    const fmt = (iso) =>
+        new Date(iso).toLocaleTimeString("en-GB", {
+            hour: "2-digit", minute: "2-digit", timeZone: "Europe/Helsinki",
+        });
+
+    const scheduled = (t) => (t.arrivalTime ? new Date(`${t.date}T${t.arrivalTime}`) : new Date(0));
+    const effective = (t) => (t.actualArrival ? new Date(t.actualArrival) : scheduled(t));
+
+    //const arrival = (t) => new Date(`${t.date}T${t.arrivalTime}`);
+    const nextId = visible.find((t) => effective(t) >= now)?.id;
 
     const stationName = (c) => (namesByCode[c] ?? c).replace(/ asema$/i, "");
     const chip = (active) =>
@@ -41,6 +50,10 @@ const Closing = () => {
             active ? "border-gray-700 bg-gray-700 text-white"
                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
         }`;
+
+
+
+    
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -59,15 +72,18 @@ const Closing = () => {
                         <button onClick={() => setNight(tonight)} className={chip(night === tonight)}>
                             Tonight
                         </button>
+                        {/*}
                         <button onClick={() => setNight(addDays(tonight, 1))} className={chip(night === addDays(tonight, 1))}>
                             Tomorrow night
                         </button>
+                        */}
                         <input
                             type="date"
                             value={night}
                             onChange={(e) => e.target.value && setNight(e.target.value)}
                             className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm"
                         />
+                        
                     </div>
 
                     <p className="mt-3 text-sm text-gray-500">
@@ -112,7 +128,7 @@ const Closing = () => {
                     {visible.length > 0 && (
                         <div className="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-white">
                             {visible.map((t) => {
-                                const past = arrival(t) < now;
+                                const past = effective(t) < now;
                                 return (
                                     <div
                                         key={t.id}
@@ -120,20 +136,22 @@ const Closing = () => {
                                             past ? "opacity-40" : ""
                                         } ${t.id === nextId ? "bg-amber-50" : ""}`}
                                     >
+                                        {/* Time */}
                                         <div className="w-14 shrink-0 sm:w-20">
-                                            <div className="text-lg font-semibold">{t.arrivalTime.slice(0, 5)}</div>
+                                            <div className={`text-lg font-semibold ${t.cancelled ? "text-gray-400 line-through" : ""}`}>
+                                                {t.found && t.actualArrival ? fmt(t.actualArrival) : t.arrivalTime?.slice(0, 5)}
+                                            </div>
+                                            {t.delayMinutes > 0 && (
+                                                <div className="text-xs text-red-600">+{t.delayMinutes} min</div>
+                                            )}
+                                            {!t.found && <div className="text-xs text-gray-400">not found</div>}
                                             {t.id === nextId && <div className="text-xs text-amber-700">next</div>}
                                         </div>
 
-                                        <div className="shrink-0">
-                                            <div className={`inline-block rounded-full border px-3 py-1 font-medium ${trainBadgeStyle({ commuterLine: t.trainLine })}`}>
-                                                {t.trainLine || "—"}
-                                            </div>
+                                        {/* Platform */}
+                                        <div className="w-8 shrink-0 text-right text-xl font-bold sm:w-12">
+                                            {t.platform || "—"}
                                         </div>
-
-                                        <div className="min-w-0 flex-1 text-xs font-medium text-gray-500">{t.trainCode}</div>
-
-                                        <div className="w-8 shrink-0 text-right text-xl font-bold text-gray-400 sm:w-12">—</div>
                                     </div>
                                 );
                             })}
