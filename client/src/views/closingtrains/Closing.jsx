@@ -1,8 +1,8 @@
 // src/views/Closing.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useStations, useClosingRange } from "../../hooks/apiHooks";
-import { addDays, currentNightStart, nightWindow, prettyDay } from "../../utils/dates";
-//import { trainBadgeStyle } from "../../utils/trainColors";
+import { currentNightStart, nightWindow, prettyDay } from "../../utils/dates";
+import { trainBadgeStyle } from "../../utils/trainColors";
 
 function useNow(ms = 30000) {
     const [now, setNow] = useState(() => new Date());
@@ -18,7 +18,7 @@ const Closing = () => {
     const [night, setNight] = useState(tonight);
     const [startTime, setStartTime] = useState("20:00");
     const [endTime, setEndTime] = useState("10:00");
-    
+
     const [selected, setSelected] = useState(null);
     const now = useNow();
 
@@ -129,10 +129,12 @@ const Closing = () => {
                         <div className="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-white">
                             {visible.map((t) => {
                                 const past = effective(t) < now;
+                                const wagons = t.wagons ?? [];
+
                                 return (
                                     <div
                                         key={t.id}
-                                        className={`flex items-center gap-3 border-b border-gray-100 px-4 py-4 last:border-b-0 sm:px-5 ${
+                                        className={`flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-gray-100 px-4 py-4 last:border-b-0 sm:flex-nowrap sm:px-5 ${
                                             past ? "opacity-40" : ""
                                         } ${t.id === nextId ? "bg-amber-50" : ""}`}
                                     >
@@ -146,6 +148,36 @@ const Closing = () => {
                                             )}
                                             {!t.found && <div className="text-xs text-gray-400">not found</div>}
                                             {t.id === nextId && <div className="text-xs text-amber-700">next</div>}
+                                        </div>
+
+                                        {/* Train */}
+                                        <div className="shrink-0">
+                                            <div className={`inline-block rounded-full border px-3 py-1 font-medium ${trainBadgeStyle({ commuterLine: t.trainLine })}`}>
+                                                {t.trainLine || t.trainCode}
+                                            </div>
+                                        </div>
+
+                                        {/* Runkolinja */}
+                                        <div className="min-w-0 flex-1 text-xs font-medium text-gray-500">
+                                            {t.trainCode}
+                                        </div>
+
+                                        {/* Wagons */}
+                                        <div className="order-last flex w-full flex-wrap justify-end gap-1 sm:order-none sm:w-auto sm:shrink-0">
+                                            {wagons.length ? (
+                                                wagons.map((number, i) => (
+                                                    <div
+                                                        key={`${number}-${i}`}
+                                                        className="rounded-t-md rounded-b-sm border border-gray-400 px-2 py-1 text-xs font-semibold"
+                                                    >
+                                                        {number}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="rounded-t-md rounded-b-sm border border-gray-300 px-2 py-1 text-xs text-gray-400">
+                                                    —
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Platform */}

@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +67,25 @@ public class ClosingTrainService {
                             .filter(t -> !at(t).isBefore(from) && at(t).isBefore(to))
                             .sorted(Comparator.comparing(this::at))
                             .toList();
+    }
+
+    private List<String> wagons(JsonNode comp) {
+        if (comp == null) return List.of();
+
+        List<JsonNode> all = new ArrayList<>();
+        comp.path("journeySections").forEach(s -> s.path("wagons").forEach(all::add));
+        all.sort(Comparator.comparingInt(w -> w.path("location").asInt()));
+
+        return all.stream()
+                .map(w -> w.hasNonNull("vehicleNumber")
+                        ? w.get("vehicleNumber").asText()
+                        : w.path("salesNumber").asText(""))
+                .filter(n -> !n.isBlank())
+                .map(n -> {
+                    String base = n.split("-")[0];
+                    return base.length() > 2 ? base.substring(base.length() - 2) : base;
+                })
+                .toList();
     }
 
 
@@ -204,7 +224,7 @@ private ClosingTrainStatusDTO toStatus(ClosingTrain ct) {
     if (row == null) {
         return new ClosingTrainStatusDTO(ct.getId(), ct.getDate(), ct.getArrivalTime(),
                 ct.getTrainLine(), ct.getTrainCode(), ct.getStationCode(),
-                false, null, 0, null, false);
+                false, null, 0, null, false, List.of());
     }
 
     // best available time: actual (already arrived) > estimate > schedule
@@ -212,14 +232,18 @@ private ClosingTrainStatusDTO toStatus(ClosingTrain ct) {
             : row.hasNonNull("liveEstimateTime") ? row.get("liveEstimateTime").asText()
             : row.path("scheduledTime").asText();
 
+    LocalDate departureDate = LocalDate.parse(train.path("departureDate").asText());
+    JsonNode composition = digitraffic.getComposition(departureDate, ct.getTrainCode());
+
     return new ClosingTrainStatusDTO(ct.getId(), ct.getDate(), ct.getArrivalTime(),
             ct.getTrainLine(), ct.getTrainCode(), ct.getStationCode(),
             true,
             Instant.parse(best).toString(),
             row.path("differenceInMinutes").asInt(0),
             row.path("commercialTrack").asText(""),
-            train.path("cancelled").asBoolean() || row.path("cancelled").asBoolean());
-}
+            train.path("cancelled").asBoolean() || row.path("cancelled").asBoolean(),
+            wagons(composition));
+    }
 
 private LocalDate arrivalDate(JsonNode row) {
     return Instant.parse(row.path("scheduledTime").asText()).atZone(HELSINKI).toLocalDate();

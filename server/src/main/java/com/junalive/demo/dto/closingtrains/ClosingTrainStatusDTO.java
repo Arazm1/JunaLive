@@ -2,6 +2,7 @@ package com.junalive.demo.dto.closingtrains;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 
 public record ClosingTrainStatusDTO(
@@ -17,5 +18,6 @@ public record ClosingTrainStatusDTO(
     String actualArrivalTime,
     int delayMinutes,
     String platform,
-    Boolean cancelled
+    Boolean cancelled,
+    List<String> wagons
 ) {}

@@ -1,6 +1,7 @@
 package com.junalive.demo.client;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +16,7 @@ public class DigitrafficClient {
 
     private static final long TTL_MS = 30_000;
     private record Cached(JsonNode value, long at){}
+    private final Map<String, Cached> compositionCache = new HashMap<>();
 
 
     private final Map<String, Cached> cache = new ConcurrentHashMap<>();
@@ -46,5 +48,29 @@ public class DigitrafficClient {
         }
         cache.put(key, new Cached(train, System.currentTimeMillis()));
         return train;
+    }
+
+
+    /** The composition for a departure date and number, or null if none is published. */
+    public JsonNode getComposition(LocalDate departureDate, int trainNumber){
+        String key = departureDate + "_" + trainNumber;
+        Cached c = compositionCache.get(key);
+        if(c != null && System.currentTimeMillis() - c.at() < TTL_MS){
+            return c.value();
+        }
+
+        JsonNode comp = null;
+
+        try{
+            comp = client.get()
+                            .uri("/compositions/{d}/{n}", departureDate, trainNumber)
+                            .retrieve()
+                            .body(JsonNode.class);
+        }
+        catch(RestClientException e){
+            e.printStackTrace();
+        }
+        compositionCache.put(key, new Cached(comp, System.currentTimeMillis()));
+        return comp;
     }
 }
