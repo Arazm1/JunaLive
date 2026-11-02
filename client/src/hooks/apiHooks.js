@@ -107,9 +107,77 @@ const useWagons = (trains, limit = 18) =>{
 }
 
 
+
+const useClosingList = (date) =>{
+  const [trains, setTrains] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/closing-trains?date=${date}`)
+            .then((res) => {
+                if (!res.ok) throw new Error(`Server error ${res.status}`);
+                return res.json();
+            })
+            .then((data) => {
+                if (cancelled) return;
+                setTrains(data);
+                setError(null);
+            })
+            .catch((e) => !cancelled && setError(e.message))
+            .finally(() => !cancelled && setLoading(false));
+
+        return () => {
+            cancelled = true;
+        };
+    }, [date]);
+
+    return { trains, loading, error };
+
+}
+
+
+function useClosingRange(from, to) {
+    const [trains, setTrains] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+
+        async function load() {
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/closing-trains/range?from=${from}&to=${to}`
+                );
+                if (!res.ok) throw new Error(`Server error ${res.status}`);
+                const data = await res.json();
+                if (!cancelled) { setTrains(data); setError(null); }
+            } catch (e) {
+                if (!cancelled) setError(e.message);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        load();
+        const id = setInterval(load, 60000);
+        return () => { cancelled = true; clearInterval(id); };
+    }, [from, to]);
+
+    return { trains, loading, error };
+}
+
+
 export {
   useLiveTrains,
   useStations,
-  useWagons
-
+  useWagons,
+  useClosingList,
+  useClosingRange
 };

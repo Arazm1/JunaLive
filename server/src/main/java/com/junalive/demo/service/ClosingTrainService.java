@@ -1,8 +1,15 @@
 package com.junalive.demo.service;
 
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +33,7 @@ public class ClosingTrainService {
         return new ClosingTrainDTO(
             closingTrain.getId(),
             closingTrain.getDate(),
+            closingTrain.getArrivalTime(),
             closingTrain.getTrainLine(),
             closingTrain.getTrainCode(),
             closingTrain.getStationCode()
@@ -39,18 +47,21 @@ public class ClosingTrainService {
         ct.setTrainCode(request.trainCode());
         ct.setStationCode(request.stationCode());
         return ct;
+    }
 
+    private LocalDateTime at(ClosingTrain t) {
+        return LocalDateTime.of(t.getDate(), t.getArrivalTime());
     }
 
 
     @Transactional(readOnly = true)
-    public List<ClosingTrainDTO> getClosingTrains(LocalDate date) {
+    public List<ClosingTrainDTO> getClosingTrains(LocalDateTime from, LocalDateTime to) {
 
-        return repository
-                .findByDate(date)
-                .stream()
-                .map(this::toClosingTrainDTO)
-                .toList();
+        return repository.findByDateBetween(from.toLocalDate(), to.toLocalDate()).stream()
+            .filter(t -> !at(t).isBefore(from) && at(t).isBefore(to))
+            .sorted(Comparator.comparing(this::at))
+            .map(this::toClosingTrainDTO)
+            .toList();
     }
 
 
@@ -114,27 +125,29 @@ public class ClosingTrainService {
         return toClosingTrainDTO(savedTrain);
     }
 
-    /*
-    Currently doesnt work.
     @Transactional
     public int replaceList(List<ClosingTrainRequest> rows) {
-        // clear only the (date, station) pairs that are in this paste
-        rows.stream()
-            .map(r -> List.of(r.date(), r.stationCode()))
-            .distinct()
-            .forEach(p -> repository.deleteByDateAndStationCode((LocalDate) p.get(0), (String) p.get(1)));
+        Function<ClosingTrainRequest, LocalDateTime> when = r -> LocalDateTime.of(r.date(), r.arrivalTime());
 
-        List<ClosingTrain> entities = rows.stream().map(this::toEntity).toList();
+        rows.stream().collect(Collectors.groupingBy(ClosingTrainRequest::stationCode)).forEach((station, list) -> {
+            LocalDateTime min = list.stream().map(when).min(Comparator.naturalOrder()).get();
+            LocalDateTime max = list.stream().map(when).max(Comparator.naturalOrder()).get();
+            List<ClosingTrain> old = repository
+                    .findByStationCodeAndDateBetween(station, min.toLocalDate(), max.toLocalDate()).stream()
+                    .filter(t -> !at(t).isBefore(min) && !at(t).isAfter(max))
+                    .toList();
+            repository.deleteAll(old);
+        });
+        repository.flush();
+
+        Set<String> seen = new HashSet<>();
+        List<ClosingTrain> entities = rows.stream()
+                .filter(r -> seen.add(r.date() + "_" + r.stationCode() + "_" + r.trainCode()))
+                .map(this::toEntity)
+                .toList();
         repository.saveAll(entities);
         return entities.size();
     }
-     */
-    /*
-    @Transactional
-    public int replaceClosingTrainList(List<ClosingTrainRequest> rows){
-        record Slot
-    }
-        */
 
     /**
      * Delete a closing train
