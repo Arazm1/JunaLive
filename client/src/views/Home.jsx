@@ -1,14 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+//import { useState } from "react";
+//import { useNavigate } from "react-router";
+
+import SearchBar from "../components/SearchBar/SearchBar.jsx";
 
 
 const Home = () => {
 
-    const [station, setStation] = useState('');
-    const navigate = useNavigate();
+    //const [station, setStation] = useState('');
+    //const navigate = useNavigate();
 
 
 
+    /*
     const handleSearch = () =>{
         if(!station.trim()){
             return;
@@ -16,6 +19,7 @@ const Home = () => {
 
         navigate(`/station/${station.trim().toLowerCase()}`);
     }
+        */
 
 
     return (
@@ -43,30 +47,7 @@ const Home = () => {
                     </p>
 
                     <div className="mt-8">
-                        <div className="relative">
-                            <input 
-                            type="text"
-                            value={station}
-                            onChange={(e) => setStation(e.target.value)}
-                            onKeyDown={(e) => {
-                                if(e.key == 'Enter'){
-                                    handleSearch();
-                                }
-                            }}
-
-                            placeholder="Search for a station..."
-                            className="h-14 w-full rounded-xl border border-gray-300 bg-white px-5 pr-12 text-base shadow-sm outline-none transition placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
-                            />
-
-                            <button
-                                onClick={handleSearch}
-                                className="absolute right-2 top-2 flex h-10 w-20 items-center justify-center rounded-lg bg-gray-700 text-white transition hover:bg-gray-800"
-                                aria-label="Search"
-                            >
-                                Search
-                            </button>
-                        </div>
-
+                        <SearchBar />
                     </div>
 
                 </div>
