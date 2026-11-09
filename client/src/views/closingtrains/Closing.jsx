@@ -56,7 +56,7 @@ const Closing = () => {
     
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             <header className="h-16 border-b border-gray-200 bg-white">
                 <div className="mx-auto flex h-full max-w-7xl items-center px-6">
                     <h1 className="text-xl font-semibold">JunaLive</h1>
