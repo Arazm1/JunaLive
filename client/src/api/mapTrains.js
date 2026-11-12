@@ -29,8 +29,6 @@ const pickOtherEnd = (rows, rowIndex, type, commuterLine) => {
 }
 
 
-
-
 export function mapTrain(train, stationCode, type, stationNames) {
     const rowType = type === "departures" ? "DEPARTURE" : "ARRIVAL";
     const rows = train.timeTableRows;
