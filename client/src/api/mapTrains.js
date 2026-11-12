@@ -1,3 +1,36 @@
+const LOOP_VIA = {
+    I: 'LEN',
+    P: 'LEN',
+};
+
+const pickOtherEnd = (rows, rowIndex, type, commuterLine) => {
+    const via = LOOP_VIA[commuterLine];
+
+    if(via){
+        if(type == 'departures'){
+            // Destination set to the Airport if the train hasn't passed it yet
+            for(let i = rowIndex + 1; i < rows.length; i++){
+                if(rows[i].stationShortCode === via){
+                    return rows[i];
+                }
+            }
+            return type === 'departures' ? rows[rows.length - 1] : rows[0];
+        }
+        else{
+            for(let i = rowIndex - 1; i>= 0; i--){
+                if(rows[i].stationShortCode === via){
+                    return rows[i];
+                }
+            }
+        }
+    }
+    return type === 'departures' ? rows[rows.length - 1] : rows[0];
+
+}
+
+
+
+
 export function mapTrain(train, stationCode, type, stationNames) {
     const rowType = type === "departures" ? "DEPARTURE" : "ARRIVAL";
     const rows = train.timeTableRows;
@@ -7,7 +40,8 @@ export function mapTrain(train, stationCode, type, stationNames) {
     );
     if (!row) return null;
 
-    const otherEnd = type === "departures" ? rows[rows.length - 1] : rows[0];
+    //const otherEnd = type === "departures" ? rows[rows.length - 1] : rows[0];
+    const otherEnd = pickOtherEnd(rows, rows.indexOf(row), type, train.commuterLineID);
     const nameOf = (code) =>
         (stationNames[code] || code).replace(/ asema$/i, "");
 
