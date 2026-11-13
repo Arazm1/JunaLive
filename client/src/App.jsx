@@ -5,20 +5,25 @@ import Home from './views/Home';
 import Station from './views/Station';
 import SearchClosingTrains from './views/closingtrains/SearchClosingTrains';
 import Closing from './views/closingtrains/Closing';
+import Login from './views/authentication/Login';
+import { UserProvider } from './contexts/UserContext';
 
 const App = () => {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <Routes>
+        <UserProvider>
+          <Routes>
 
-          <Route path="/" element={<Home />} />
-          <Route path="/station/:stationName" element={<Station />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/station/:stationName" element={<Station />} />
+            <Route path="/login" element={<Login />} />
 
 
-          <Route path="/closing-trains/search" element={<SearchClosingTrains />} />
-          <Route path="/closing-trains2/search" element={<Closing />} />
+            <Route path="/closing-trains/search" element={<SearchClosingTrains />} />
+            <Route path="/closing-trains2/search" element={<Closing />} />
 
-        </Routes>
+          </Routes>
+        </UserProvider>
     </BrowserRouter>
   )
 }
