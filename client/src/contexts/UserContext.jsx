@@ -1,4 +1,4 @@
-import { Children, createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useAuthentication, useUser } from "../hooks/apiHooks";
 import { useNavigate } from "react-router";
 
@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 const UserContext = createContext(null);
 
 
-const UserProvider = ({Children}) => {
+const UserProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [loadingUser, setLoadingUser] = useState(null);
 
@@ -78,7 +78,7 @@ const UserProvider = ({Children}) => {
             handleLogout,
             handleAutoLogin,
         }}>
-            {Children}
+            {children}
         </UserContext.Provider>
     );
 };
