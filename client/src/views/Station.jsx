@@ -10,12 +10,12 @@ import logo from "../assets/logo.png";
 const Station = () =>{
 
     const { stationName } = useParams();
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
 
     const [option, setOption] = useState('departures');
     const [isOpen, setIsOpen] = useState(false);
 
-    const [station, setStation] = useState('');
+    //const [station, setStation] = useState('');
     
 
     //const stationDisplay = 'Helsinki';
@@ -40,15 +40,6 @@ const Station = () =>{
         : stationName;
 
     const errorMessage = stationsError || error || (notFound && `Station "${stationName}" not found`);
-
-
-    
-    const handleSearch = () =>{
-        if(!station.trim()){
-            return;
-        }
-        navigate(`/station/${station.trim().toLowerCase()}`);
-    }
 
 
     return(
@@ -176,7 +167,12 @@ const Station = () =>{
 
                                     {/* Train */}
                                     <div className="p-2">
-                                        <div className={`font-medium border rounded-full px-3 py-1 inline-block ${trainBadgeStyle(train)}`}>
+                                        {/*<div className={`font-medium border rounded-full  px-3 py-1 inline-block ${trainBadgeStyle(train)}`}>*/}
+                                        <div
+                                            className={`inline-flex items-center justify-center rounded-full border font-medium ${
+                                                train.commuterLine ? "h-9 w-9" : "px-3 py-1"
+                                            } ${trainBadgeStyle(train)}`}
+                                        >
                                             {train.train}
                                         </div>
                                     </div>

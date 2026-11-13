@@ -78,3 +78,10 @@ export function wagonNumbers(composition) {
         .filter((w) => w.n)
         .map((w) => shortWagonNumber(w.n));
 }
+
+
+
+export function wagonCount(composition) {
+    const section = composition?.journeySections?.[0];
+    return section?.wagons?.length ?? 0;
+}
