@@ -5,7 +5,10 @@ import { getLiveTrains, getStations } from "../api/digitraffic";
 import { mapTrain } from "../api/mapTrains";
 import { getComposition } from "../api/digitraffic";
 import { wagonNumbers } from "../api/mapTrains";
+import fetchData from "../utils/fetchData";
 
+
+let BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const POLL_MS = 30000;
 const cache = new Map(); // train id -> number[]
@@ -174,10 +177,56 @@ function useClosingRange(from, to) {
 }
 
 
+
+/**
+ * Custom hook for authentication-related API requests.
+ * @returns {Object} Functions for interacting with the authentication related requests.
+ *  - postLogin - Post login with inputs and returns token.
+ */
+const useAuthentication = () => {
+  //Login
+  const postLogin = async (inputs) => {
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputs),
+    };
+
+    const result = await fetchData(
+      BACKEND_URL + '/api/v1/auth/login',
+      fetchOptions,
+    );
+    return result;
+  }
+
+  return {postLogin}
+}
+
+
+const useUser = () => {
+  const getUserByToken = async (token) => {
+    const fetchOptions = {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+      },
+    };
+
+    const result = await fetchData(BACKEND_URL + '/api/v1/users/me', fetchOptions);
+    return { user: result };
+  };
+  return { getUserByToken }
+};
+
+
 export {
   useLiveTrains,
   useStations,
   useWagons,
   useClosingList,
-  useClosingRange
+  useClosingRange,
+  useAuthentication,
+  useUser
 };
