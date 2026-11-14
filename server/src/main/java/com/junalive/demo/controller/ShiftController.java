@@ -63,5 +63,12 @@ public class ShiftController {
                     @PathVariable Integer trainCode) {
         service.unmarkTrain(id, departureDate, trainCode);
     }
+
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ShiftDTO> upcoming(){
+        return service.listUpcoming();
+    }
     
 }

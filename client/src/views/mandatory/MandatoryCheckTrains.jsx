@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useStations, useMandatoryTrains } from "../../hooks/apiHooks";
+import { useStations, useMandatoryCheckTrains } from "../../hooks/apiHooks";
 import { prettyDay } from "../../utils/dates";
 import { trainBadgeStyle } from "../../utils/trainColors";
 
@@ -21,7 +21,7 @@ const fmt = (iso) =>
 const fmtWindow = (s) => `${prettyDay(s.slice(0, 10))} ${s.slice(11, 16)}`;
 
 const MandatoryCheckTrains = () => {
-    const { data, loading, error, updatedAt } = useMandatoryTrains();
+    const { data, loading, error, updatedAt } = useMandatoryCheckTrains();
     const { namesByCode } = useStations();
     const now = useNow();
 
