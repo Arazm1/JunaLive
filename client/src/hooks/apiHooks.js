@@ -110,6 +110,59 @@ const useWagons = (trains, limit = 18) =>{
 }
 
 
+const useMandatoryCheckTrains = () =>{
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [updatedAt, setUpdatedAt] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try{
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/my/closing`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                });
+        if(response.status === 401){
+          throw new Error('Please log in again');
+        }
+
+        if(!response.ok){
+          throw new Error(`Server error ${res.status}`)
+        }
+
+        const json = await response.json();
+        if(!cancelled){
+          setData(json);
+          setError(null);
+          setUpdatedAt(new Date());
+        }
+      }
+      catch(e){
+        if(!cancelled){
+          setError(e.message);
+        }
+      }
+      finally{
+        if(!cancelled){
+          setLoading(false);
+        }
+      }
+
+      load();
+      const id = setInterval(load, 30000);
+      return () =>{
+        cancelled(true);
+        clearInterval(id);
+      };
+    }
+  }, []);
+
+  return { data, loading, error, updatedAt };
+}
+
+
 
 const useClosingList = (date) =>{
   const [trains, setTrains] = useState([]);
@@ -225,6 +278,7 @@ export {
   useLiveTrains,
   useStations,
   useWagons,
+  useMandatoryCheckTrains,
   useClosingList,
   useClosingRange,
   useAuthentication,
