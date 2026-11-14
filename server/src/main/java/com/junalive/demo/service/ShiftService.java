@@ -153,5 +153,20 @@ public class ShiftService {
     public void unmarkTrain(Integer shifId, LocalDate departureDate, Integer trainCode){
         mandatoryTrainRepository.deleteByShiftIdAndDepartureDateAndTrainCode(shifId, departureDate, trainCode);
     }
+
+
+    @Transactional(readOnly = true)
+    public List<ShiftDTO> listUpcoming(){
+        return shiftRepository
+            .findByWindowEndAfterOrderByWindowStartAsc(LocalDateTime.now(HELSINKI))
+            .stream()
+            .map(s -> new ShiftDTO(
+                s.getId(),
+                s.getStationCode(),
+                s.getWindowStart(),
+                s.getWindowEnd()
+            ))
+            .toList();
+    }
     
 }
