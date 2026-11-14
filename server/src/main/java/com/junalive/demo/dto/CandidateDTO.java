@@ -1,4 +1,4 @@
-package com.junalive.demo.dto.authentication;
+package com.junalive.demo.dto;
 
 import java.time.LocalDate;
 
