@@ -15,7 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "username")
+    @Column(name = "username", length = 50, nullable = false, unique = true)
     private String username;
 
     @Column(name = "email")
@@ -24,14 +24,22 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "role")
+    private String role;
+
+    @Column(name = "station_code")
+    private String stationCode;
+
 
     public User(){}
 
-    public User(Integer id, String username, String email, String password){
+    public User(Integer id, String username, String email, String password, String role, String stationCode){
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = role != null ? role : "GUARD";
+        this.stationCode = stationCode;
     }
 
 
@@ -51,6 +59,14 @@ public class User {
         return this.password;
     }
 
+    public String getRole(){
+        return this.role;
+    }
+
+    public String getStationCode(){
+        return this.stationCode;
+    }
+
 
     public void setId(Integer id){
         this.id = id;
@@ -66,6 +82,14 @@ public class User {
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void setRole(String role){
+        this.role = role;
+    }
+
+    public void setStationCode(String stationCode){
+        this.stationCode = stationCode;
     }
     
 }
