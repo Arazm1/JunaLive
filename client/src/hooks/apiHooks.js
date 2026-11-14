@@ -121,7 +121,7 @@ const useMandatoryCheckTrains = () =>{
 
     const load = async () => {
       try{
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/my/closing`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/my/check`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
         if(response.status === 401){
@@ -129,7 +129,7 @@ const useMandatoryCheckTrains = () =>{
         }
 
         if(!response.ok){
-          throw new Error(`Server error ${res.status}`)
+          throw new Error(`Server error ${response.status}`)
         }
 
         const json = await response.json();
@@ -149,14 +149,14 @@ const useMandatoryCheckTrains = () =>{
           setLoading(false);
         }
       }
+    }
 
-      load();
+    load();
       const id = setInterval(load, 30000);
       return () =>{
-        cancelled(true);
+        cancelled = true;
         clearInterval(id);
       };
-    }
   }, []);
 
   return { data, loading, error, updatedAt };
