@@ -6,7 +6,7 @@ CREATE TABLE users(
   id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   username   VARCHAR(50)  NOT NULL UNIQUE,
   email      VARCHAR(50) NOT NULL UNIQUE,
-  password   VARCHAR(50) NOT NULL UNIQUE,
+  password   VARCHAR(255) NOT NULL UNIQUE,
   role       VARCHAR(50) NOT NULL DEFAULT 'GUARD',
   station_code VARCHAR(10) NOT NULL
 );
@@ -29,6 +29,6 @@ CREATE TABLE mandatory_trains(
     train_code INT NOT NULL,
     train_line VARCHAR(10) NULL,
     UNIQUE KEY uq_shift_train (shift_id, departure_date, train_code),
-    FOREIGN KEY (shift_id) REFERENCES closing_shifts(id) ON DELETE CASCADE
+    FOREIGN KEY (shift_id) REFERENCES shifts(id) ON DELETE CASCADE
 );
 
