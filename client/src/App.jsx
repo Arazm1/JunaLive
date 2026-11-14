@@ -7,6 +7,7 @@ import SearchClosingTrains from './views/closingtrains/SearchClosingTrains';
 import Closing from './views/closingtrains/Closing';
 import Login from './views/authentication/Login';
 import { UserProvider } from './contexts/UserContext';
+import MandatoryCheckTrains from './views/mandatory/MandatoryCheckTrains';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/station/:stationName" element={<Station />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/mctrains" element={<MandatoryCheckTrains />} />
 
 
             <Route path="/closing-trains/search" element={<SearchClosingTrains />} />
