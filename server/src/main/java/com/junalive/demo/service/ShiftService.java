@@ -18,6 +18,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.junalive.demo.client.DigitrafficClient;
 import com.junalive.demo.dto.CandidateDTO;
+import com.junalive.demo.dto.mandatorytrain.MTrainRequest;
+import com.junalive.demo.dto.shift.ShiftDTO;
+import com.junalive.demo.dto.shift.ShiftRequest;
+import com.junalive.demo.entity.MandatoryTrain;
 import com.junalive.demo.entity.Shift;
 import com.junalive.demo.repository.MandatoryTrainRepository;
 import com.junalive.demo.repository.ShiftRepository;
@@ -41,7 +45,7 @@ public class ShiftService {
         this.digitraffic = digitraffic;
     }
 
-    
+
     @Transactional(readOnly = true)
     public List<CandidateDTO> getCandidates(Integer shiftId) {
         Shift shift = shiftRepository.findById(shiftId)
@@ -92,6 +96,62 @@ public class ShiftService {
 
         result.sort(Comparator.comparing(CandidateDTO::scheduledArrival));
         return result;
+    }
+
+
+
+    @Transactional
+    public ShiftDTO createShift(ShiftRequest sr){
+        if(!sr.windowEnd().isAfter(sr.windowStart()) 
+            || Duration.between(sr.windowStart(), sr.windowEnd()).toHours() > 24 ){
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Window end must be after start, and at most 24 hours long"
+            );
+        }
+
+        Shift shift = new Shift();
+        shift.setStationCode(sr.stationCode().trim().toUpperCase());
+        shift.setWindowStart(sr.windowStart());
+        shift.setWindowEnd(sr.windowEnd());
+        Shift saved = shiftRepository.save(shift);
+
+        return new ShiftDTO(
+            saved.getId(), 
+            saved.getStationCode(),
+            saved.getWindowStart(),
+            saved.getWindowEnd()
+        );
+    }
+
+
+
+    @Transactional
+    public void markTrain(Integer shiftId, MTrainRequest mtr){
+        if(!shiftRepository.existsById(shiftId)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        if(mandatoryTrainRepository.existsByShiftIdAndDepartureDateAndTrainCode(
+            shiftId, 
+            mtr.departureDate(),
+            mtr.trainCode())
+        ){
+            return;
+        }
+
+
+        MandatoryTrain mt = new MandatoryTrain();
+        mt.setShiftId(shiftId);
+        mt.setDepartureDate(mtr.departureDate());
+        mt.setTrainCode(mtr.trainCode());
+        mt.setTrainLine(mtr.trainLine());
+        mandatoryTrainRepository.save(mt);
+    }
+
+
+    @Transactional
+    public void unmarkTrain(Integer shifId, LocalDate departureDate, Integer trainCode){
+        mandatoryTrainRepository.deleteByShiftIdAndDepartureDateAndTrainCode(shifId, departureDate, trainCode);
     }
     
 }
