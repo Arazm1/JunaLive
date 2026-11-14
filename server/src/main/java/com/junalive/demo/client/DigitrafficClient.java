@@ -1,7 +1,9 @@
 package com.junalive.demo.client;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -72,5 +74,36 @@ public class DigitrafficClient {
         }
         compositionCache.put(key, new Cached(comp, System.currentTimeMillis()));
         return comp;
+    }
+
+
+
+    public List<JsonNode> getArrivals(String station, long minutesBefore, long minutesAfter){
+        try{
+            JsonNode body = client.get()
+                                .uri(u -> u.path("/live-trains/station/{s}")
+                                .queryParam("minutes_before_arrival", minutesBefore)
+                                .queryParam("minutes_after_arrival", minutesAfter)
+                                .queryParam("minutes_before_departure", 0)
+                                .queryParam("minutes_after_departure", 0)
+                                .queryParam("include_nonstopping", false)
+                                .queryParam("train_categories", "Commuter")
+                                .build(station)
+                            )
+                        .retrieve()
+                        .body(JsonNode.class);
+
+            List<JsonNode> trains = new ArrayList<>();
+            if(body != null && body.isArray()){
+                for(JsonNode train : body){
+                    trains.add(train);
+                }
+            }
+            return trains;
+
+        }
+        catch(RestClientException e){
+            return List.of();
+        }
     }
 }
