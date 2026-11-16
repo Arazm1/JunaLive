@@ -162,8 +162,45 @@ const useMandatoryCheckTrains = () =>{
   return { data, loading, error, updatedAt };
 }
 
+//Temporary workaround
+import { api } from "../../api/backend";
+const useShift = () => {
+
+  const [shift, setShift] = useState(null);
+  const [error, setError] = useState(null);
+
+  const loadShifts = async () => {
+    try{
+      setShift(await api("/shifts"));
+    }
+    catch(e){
+      setError(e.message);
+    }
+  }
 
 
+  const postShift = async (stationCode, from, to) => {
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: { stationCode: stationCode.trim().toUpperCase(), windowStart: from, windowEnd: to },
+    };
+
+    const result = await fetchData(
+      BACKEND_URL + '/shifts',
+      fetchOptions,
+    );
+    return result;
+  }
+
+  return { loadShifts, postShift }
+}
+
+
+
+//DEPRECATED
 const useClosingList = (date) =>{
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,7 +233,7 @@ const useClosingList = (date) =>{
 
 }
 
-
+//DEPRECATED
 function useClosingRange(from, to) {
     const [trains, setTrains] = useState([]);
     const [loading, setLoading] = useState(true);

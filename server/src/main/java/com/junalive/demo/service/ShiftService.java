@@ -91,7 +91,8 @@ public class ShiftService {
                     train.path("commuterLineID").asText(""),
                     scheduled.toString(),
                     row.path("commercialTrack").asText(""),
-                    marked.contains(depDate + "_" + number)));
+                    marked.contains(depDate + "_" + number))
+                );
         }
 
         result.sort(Comparator.comparing(CandidateDTO::scheduledArrival));
