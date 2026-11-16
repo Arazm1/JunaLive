@@ -316,6 +316,7 @@ export {
   useStations,
   useWagons,
   useMandatoryCheckTrains,
+  useShift,
   useClosingList,
   useClosingRange,
   useAuthentication,
