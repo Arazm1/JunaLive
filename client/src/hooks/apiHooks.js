@@ -163,7 +163,7 @@ const useMandatoryCheckTrains = () =>{
 }
 
 //Temporary workaround
-import { api } from "../../api/backend";
+import { api } from "../api/backend";
 const useShift = () => {
 
   const [shift, setShift] = useState(null);

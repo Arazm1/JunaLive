@@ -3,8 +3,6 @@ import {BrowserRouter, Routes, Route} from 'react-router';
 
 import Home from './views/Home';
 import Station from './views/Station';
-import SearchClosingTrains from './views/closingtrains/SearchClosingTrains';
-import Closing from './views/closingtrains/Closing';
 import Login from './views/authentication/Login';
 import { UserProvider } from './contexts/UserContext';
 import MandatoryCheckTrains from './views/mandatory/MandatoryCheckTrains';
