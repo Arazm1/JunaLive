@@ -130,40 +130,114 @@ const useMandatoryCheckTrains = () => {
     return { getMandatoryCheckTrains };
 };
 
-//Temporary workaround
-import { api } from "../api/backend";
+
 const useShift = () => {
 
-  const [shift, setShift] = useState(null);
-  const [error, setError] = useState(null);
+  const getShifts = async () => {
 
-  const loadShifts = async () => {
-    try{
-      setShift(await api("/shifts"));
+      const token = localStorage.getItem('token');
+      const fetchOptions = {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      };
+
+      return await fetchData(
+          BACKEND_URL + '/api/v1/shifts',
+          fetchOptions
+      );
+  };
+
+
+  const getShiftCandidates = async (shiftId) => {
+    const token = localStorage.getItem('token');
+
+    const fetchOptions = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
-    catch(e){
-      setError(e.message);
-    }
-  }
+
+    const result = fetchData(
+      `${BACKEND_URL}/api/v1/shifts/${shiftId}/candidates`,
+      fetchOptions
+    );
+
+    return result;
+  };
 
 
   const postShift = async (stationCode, from, to) => {
+    
+    const token = localStorage.getItem('token');
     const fetchOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
-      body: { stationCode: stationCode.trim().toUpperCase(), windowStart: from, windowEnd: to },
+      body: JSON.stringify({
+          stationCode: stationCode.trim().toUpperCase(),
+          windowStart: from,
+          windowEnd: to,
+      }),
     };
 
     const result = await fetchData(
-      BACKEND_URL + '/shifts',
+      BACKEND_URL + '/api/v1/shifts',
       fetchOptions,
     );
     return result;
+  };
+
+
+  const markTrain = async (shiftId, train) => {
+    const token = localStorage.getItem("token");
+    const fetchOptions = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+          departureDate: train.departureDate,
+          trainCode: train.trainCode,
+          trainLine: train.trainLine,
+      }),
+    };
+
+    const result = await fetchData(
+      `${BACKEND_URL}/api/v1/shifts/${shiftId}/trains`,
+      fetchOptions
+    );
+    return result;
+  };
+
+
+  const unmarkTrain = async (shiftId, train) => {
+    const token = localStorage.getItem('token');
+
+    const fetchOptions = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const result = await fetchData(
+      `${BACKEND_URL}/api/v1/shifts/${shiftId}/trains/${train.departureDate}/${train.trainCode}`,
+      fetchOptions
+    );
+    return result;
+
   }
 
-  return { loadShifts, postShift }
+
+
+
+
+  return { getShifts, getShiftCandidates, postShift, markTrain, unmarkTrain }
 }
 
 

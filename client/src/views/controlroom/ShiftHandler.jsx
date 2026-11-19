@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { api } from "../../api/backend";
+import { useEffect, useMemo, useState } from "react";
+import { useShift } from "../../hooks/apiHooks";
 import { useStations } from "../../hooks/apiHooks";
 import { currentNightStart, nightWindow, prettyDay } from "../../utils/dates";
 import { trainBadgeStyle } from "../../utils/trainColors";
@@ -15,6 +15,7 @@ const keyOf = (c) => `${c.departureDate}_${c.trainCode}`;
 
 const ShiftHandler = () => {
     const { stations, namesByCode } = useStations();
+    const { getShifts, getShiftCandidates, postShift, markTrain, unmarkTrain, } = useShift();
 
     // new shift form
     const [stationCode, setStationCode] = useState("HKI");
@@ -32,17 +33,18 @@ const ShiftHandler = () => {
 
     const stationName = (c) => (namesByCode[c] ?? c).replace(/ asema$/i, "");
 
-    const loadShifts = useCallback(async () => {
-        try {
-            setShifts(await api("/shifts"));
-        } catch (e) {
+    const loadShifts = async () => {
+        try{
+            setShifts(await getShifts());
+            setError(null);
+        }
+        catch(e){
             setError(e.message);
         }
-    }, []);
-
+    };
     useEffect(() => {
         loadShifts();
-    }, [loadShifts]);
+    }, []);
 
     // candidates for the selected shift, refreshed every minute
     useEffect(() => {
@@ -51,7 +53,7 @@ const ShiftHandler = () => {
 
         async function load() {
             try {
-                const data = await api(`/shifts/${shift.id}/candidates`);
+                const data = await getShiftCandidates(shift.id);
                 if (!cancelled) {
                     setCandidates(data);
                     setError(null);
@@ -75,34 +77,40 @@ const ShiftHandler = () => {
 
     const createShift = async () => {
         const { from, to } = nightWindow(night, startTime, endTime);
-        try {
-            const created = await api("/shifts", {
-                method: "POST",
-                body: { stationCode: stationCode.trim().toUpperCase(), windowStart: from, windowEnd: to },
-            });
+        try{
+            const created = await postShift(stationCode, from, to);
+
             setShift(created);
-            loadShifts();
-        } catch (e) {
+            await loadShifts();
+            setError(null);
+        }
+        catch(e){
             setError(e.message);
         }
     };
 
     const toggle = async (c) => {
         const k = keyOf(c);
+        
         const setMarked = (value) =>
-            setCandidates((prev) => prev.map((x) => (keyOf(x) === k ? { ...x, mandatory: value } : x)));
+            setCandidates((prev) => 
+                prev.map((x) =>
+                    keyOf(x) === k ? {...x, mandatory: value } : x
+                )
+            );
 
-        setMarked(!c.mandatory);   // optimistic
-        try {
-            if (c.mandatory) {
-                await api(`/shifts/${shift.id}/trains/${c.departureDate}/${c.trainCode}`, { method: "DELETE" });
-            } else {
-                await api(`/shifts/${shift.id}/trains`, {
-                    method: "PUT",
-                    body: { departureDate: c.departureDate, trainCode: c.trainCode, trainLine: c.trainLine },
-                });
+        setMarked(!c.mandatory);
+
+        try{
+            if(c.mandatory){
+                await unmarkTrain(shift.id, c);
             }
-        } catch (e) {
+            else{
+                await markTrain(shift.id, c);
+            }
+            setError(null);
+        }
+        catch(e){
             setMarked(c.mandatory);   // revert
             setError(e.message);
         }
