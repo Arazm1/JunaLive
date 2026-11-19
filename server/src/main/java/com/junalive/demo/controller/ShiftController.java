@@ -2,9 +2,11 @@ package com.junalive.demo.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,18 +52,25 @@ public class ShiftController {
 
     @PutMapping("/{id}/trains")
     @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void mark(@PathVariable Integer id, @Valid @RequestBody MTrainRequest request) {
+    public ResponseEntity<Map<String, Boolean>> mark(
+            @PathVariable Integer id,
+            @Valid @RequestBody MTrainRequest request) {
+
         service.markTrain(id, request);
+
+        return ResponseEntity.ok(Map.of("success", true));
     }
 
     @DeleteMapping("/{id}/trains/{departureDate}/{trainCode}")
     @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unmark(@PathVariable Integer id,
-                    @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate departureDate,
-                    @PathVariable Integer trainCode) {
+    public ResponseEntity<Map<String, Boolean>> unmark(
+            @PathVariable Integer id,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate departureDate,
+            @PathVariable Integer trainCode) {
+
         service.unmarkTrain(id, departureDate, trainCode);
+
+        return ResponseEntity.ok(Map.of("success", true));
     }
 
 
