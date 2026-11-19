@@ -110,57 +110,25 @@ const useWagons = (trains, limit = 18) =>{
 }
 
 
-const useMandatoryCheckTrains = () =>{
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [updatedAt, setUpdatedAt] = useState(null);
+const useMandatoryCheckTrains = () => {
+    const getMandatoryCheckTrains = async () => {
+        const token = localStorage.getItem("token");
+        const fetchOptions = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        };
 
-  useEffect(() => {
-    let cancelled = false;
+        const result = await fetchData(
+            BACKEND_URL + "/api/v1/my/check",
+            fetchOptions
+        );
 
-    const load = async () => {
-      try{
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/my/check`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                });
-        if(response.status === 401){
-          throw new Error('Please log in again');
-        }
+        return result;
+    };
 
-        if(!response.ok){
-          throw new Error(`Server error ${response.status}`)
-        }
-
-        const json = await response.json();
-        if(!cancelled){
-          setData(json);
-          setError(null);
-          setUpdatedAt(new Date());
-        }
-      }
-      catch(e){
-        if(!cancelled){
-          setError(e.message);
-        }
-      }
-      finally{
-        if(!cancelled){
-          setLoading(false);
-        }
-      }
-    }
-
-    load();
-      const id = setInterval(load, 30000);
-      return () =>{
-        cancelled = true;
-        clearInterval(id);
-      };
-  }, []);
-
-  return { data, loading, error, updatedAt };
-}
+    return { getMandatoryCheckTrains };
+};
 
 //Temporary workaround
 import { api } from "../api/backend";

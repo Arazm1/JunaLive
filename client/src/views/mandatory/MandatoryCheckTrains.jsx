@@ -21,9 +21,58 @@ const fmt = (iso) =>
 const fmtWindow = (s) => `${prettyDay(s.slice(0, 10))} ${s.slice(11, 16)}`;
 
 const MandatoryCheckTrains = () => {
-    const { data, loading, error, updatedAt } = useMandatoryCheckTrains();
+    //const { data, loading, error, updatedAt } = useMandatoryCheckTrains();
+
+    const { getMandatoryCheckTrains } = useMandatoryCheckTrains();
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [updatedAt, setUpdatedAt] = useState(null);
+
+
     const { namesByCode } = useStations();
     const now = useNow();
+
+
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadMarkedTrains = async () => {
+            try{
+                const result = await getMandatoryCheckTrains();
+
+                if(!cancelled){
+                    setData(result);
+                    setError(null);
+                    setUpdatedAt(new Date());
+                }
+            }
+            catch(e){
+                if(!cancelled){
+                    setError(e.message);
+                }
+            }
+            finally{
+                if(!cancelled){
+                    setLoading(false);
+                }
+            }
+        };
+        loadMarkedTrains();
+
+        // Every 30sec --> reloads
+        const id = setInterval(loadMarkedTrains, 30000);
+
+        return () => {
+            cancelled = true;
+            clearInterval(id);
+        };
+    }, [getMandatoryCheckTrains]);
+
+
+
+
 
     const trains = data?.trains ?? [];
     const stationName = data
