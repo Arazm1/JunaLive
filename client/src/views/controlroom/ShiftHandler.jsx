@@ -131,11 +131,6 @@ const ShiftHandler = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <header className="h-16 border-b border-gray-200 bg-white">
-                <div className="mx-auto flex h-full max-w-7xl items-center px-6">
-                    <h1 className="text-xl font-semibold">JunaLive</h1>
-                </div>
-            </header>
 
             <main className="px-4 py-8 sm:px-6 sm:py-12">
                 <div className="mx-auto w-full max-w-2xl">

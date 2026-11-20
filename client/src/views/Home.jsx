@@ -26,22 +26,6 @@ const Home = () => {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
-            {/* Header */}
-            <header className="h-16 border-b border-gray-200 bg-white">
-                <div className="mx-auto flex h-full max-w-7xl items-center px-6">
-                    <Link to="/" className="flex items-center gap-2 cursor-pointer">
-                        <img
-                            src={logo}
-                            alt="JunaLive Logo"
-                            className="w-8 h-8 object-contain"
-                        />
-                        <h1 className="text-xl font-semibold">
-                            JunaLive
-                        </h1>
-                    </Link>
-                </div>
-
-            </header>
 
 
             {/*Main section*/}
@@ -62,14 +46,6 @@ const Home = () => {
                 </div>
 
             </main>
-
-            {/*Footer*/}
-            <footer className="h-16 border-t border-gray-200 bg-white">
-                <div className="mx-auto flex h-full max-w-7xl items-center px-6">
-                    <p>Built for learning purposes. Data provided by <a href="https://www.digitraffic.fi/" target="_blank" rel="noopener noreferrer">Digitraffic</a></p>
-                </div>
-
-            </footer>
             
         </div>
         

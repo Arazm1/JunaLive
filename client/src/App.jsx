@@ -7,18 +7,21 @@ import Login from './views/authentication/Login';
 import { UserProvider } from './contexts/UserContext';
 import MandatoryCheckTrains from './views/mandatory/MandatoryCheckTrains';
 import ShiftHandler from './views/controlroom/ShiftHandler';
+import Layout from './components/Layout';
 
 const App = () => {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
         <UserProvider>
           <Routes>
-
-            <Route path="/" element={<Home />} />
-            <Route path="/station/:stationName" element={<Station />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/mctrains" element={<MandatoryCheckTrains />} />
-            <Route path="/ccshift" element={<ShiftHandler />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/station/:stationName" element={<Station />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/mctrains" element={<MandatoryCheckTrains />} />
+              <Route path="/ccshift" element={<ShiftHandler />} />
+            </Route>
+            
 
 
           {/*
