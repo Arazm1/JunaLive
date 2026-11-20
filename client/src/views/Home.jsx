@@ -1,7 +1,6 @@
 //import { useState } from "react";
 //import { useNavigate } from "react-router";
 
-import logo from "../assets/logo.png";
 import { Link } from "react-router";
 import SearchBar from "../components/SearchBar/SearchBar.jsx";
 

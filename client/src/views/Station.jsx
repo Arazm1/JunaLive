@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { findStation } from "../api/digitraffic";
 import { useStations, useLiveTrains, useWagons } from "../hooks/apiHooks";
 import { trainBadgeStyle } from "../utils/trainColors";
 import SearchBar from "../components/SearchBar/SearchBar";
-
-import logo from "../assets/logo.png";
 
 const Station = () =>{
 
