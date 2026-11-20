@@ -140,10 +140,12 @@ const MandatoryCheckTrains = () => {
                                         </div>
 
                                         {/* Train */}
-                                        <div className="shrink-0">
-                                            <div className={`inline-block rounded-full border px-3 py-1 font-medium ${trainBadgeStyle({ commuterLine: t.trainLine })}`}>
-                                                {t.trainLine || t.trainCode}
-                                            </div>
+                                        <div
+                                            className={`inline-flex items-center justify-center rounded-full border font-medium ${
+                                                t.trainLine ? "h-9 w-9" : "px-3 py-1"
+                                            } ${trainBadgeStyle({ commuterLine: t.trainLine })}`}
+                                        >
+                                            {t.trainLine || t.trainCode}
                                         </div>
 
                                         {/* Runkolinja */}

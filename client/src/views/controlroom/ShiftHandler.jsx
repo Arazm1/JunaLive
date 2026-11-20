@@ -231,10 +231,12 @@ const ShiftHandler = () => {
                                                 {fmt(c.scheduledArrival)}
                                             </div>
 
-                                            <div className="shrink-0">
-                                                <div className={`inline-block rounded-full border px-3 py-1 font-medium ${trainBadgeStyle({ commuterLine: c.trainLine })}`}>
-                                                    {c.trainLine || c.trainCode}
-                                                </div>
+                                            <div
+                                                className={`inline-flex items-center justify-center rounded-full border font-medium ${
+                                                    c.trainLine ? "h-9 w-9" : "px-3 py-1"
+                                                } ${trainBadgeStyle({ commuterLine: c.trainLine })}`}
+                                            >
+                                                {c.trainLine || c.trainCode}
                                             </div>
 
                                             <div className="min-w-0 flex-1 text-xs font-medium text-gray-500">{c.trainCode}</div>
