@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useUserContext } from "../../hooks/contextHooks";
 import useForm from "../../hooks/formHooks";
 import login_bg from "../../assets/login_background.png";
+import { useLocation } from "react-router";
 
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
     const [error, setError] = useState('');
 
     const { handleLogin } = useUserContext();
+    const location = useLocation();
 
 
     const initValues = {
@@ -20,7 +22,7 @@ const Login = () => {
     const doLogin = async () => {
         setError('');
         try{
-            await handleLogin(inputs);
+            await handleLogin(inputs, location.state?.from?.pathname);
         }
         catch(e){
             console.log('Error in login: ', e.message);

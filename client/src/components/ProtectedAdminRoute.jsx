@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useUserContext } from "../hooks/contextHooks";
 
 /**
@@ -12,13 +12,15 @@ import { useUserContext } from "../hooks/contextHooks";
 const ProtectedAdminRoute = ({children}) => {
 
     const { user, loadingUser } = useUserContext();
+    console.log("ADMIN GUARD:", { user, loadingUser });
+    const location = useLocation();
 
     if(loadingUser){
         return <div>Loading...</div>;
     }
 
     if(!user){
-        return <Navigate to="/" />;
+        return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if(user.role != 'ADMIN'){

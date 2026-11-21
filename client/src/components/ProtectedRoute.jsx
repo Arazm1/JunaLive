@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useUserContext } from "../hooks/contextHooks"
 
 /**
@@ -8,11 +8,26 @@ import { useUserContext } from "../hooks/contextHooks"
  * @param children - The components to render if the user is authenticated.
  * @returns The children if user is authenticated, or redirects to main page.
  */
-const ProtectedRoute = ({children}) => {
-    const {user} = useUserContext();
+const ProtectedRoute = ({ children, role}) => {
+    const { user, loadingUser } = useUserContext();
+    const location = useLocation();
+
+    if(loadingUser){
+        return(
+            <p className="p-6 text-gray-500">
+                Loading...
+            </p>
+        );
+    }
 
     if(!user){
-        return <Navigate to="/" />
+        return <Navigate to="/login" replace state={{from: location}}/>
+    }
+
+    if(role && user.role !== role){
+        return(
+            <Navigate to="/" replace/>
+        )
     }
 
     return children;

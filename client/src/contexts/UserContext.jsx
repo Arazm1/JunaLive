@@ -9,7 +9,7 @@ const UserContext = createContext(null);
 
 const UserProvider = ({children}) => {
     const [user, setUser] = useState(null);
-    const [loadingUser, setLoadingUser] = useState(null);
+    const [loadingUser, setLoadingUser] = useState(true);
 
     const { postLogin } = useAuthentication();
     const { getUserByToken } = useUser();
@@ -51,10 +51,12 @@ const UserProvider = ({children}) => {
                 return;
             }
             const userData = await getUserByToken(token);
+            console.log("AUTO LOGIN:", userData);
             setUser(userData.user);
         }
         catch(e){
             console.log(e.message);
+            localStorage.removeItem('token'); 
         }
         finally{
             setLoadingUser(false);
