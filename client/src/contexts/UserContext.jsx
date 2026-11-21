@@ -51,7 +51,6 @@ const UserProvider = ({children}) => {
                 return;
             }
             const userData = await getUserByToken(token);
-            console.log("AUTO LOGIN:", userData);
             setUser(userData.user);
         }
         catch(e){
